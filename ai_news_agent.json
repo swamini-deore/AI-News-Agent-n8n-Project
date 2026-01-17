@@ -1,0 +1,176 @@
+{
+  "name": "ai_news_agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        -16
+      ],
+      "id": "d5a6cfb5-5d30-482d-9568-2268050d829f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        -16
+      ],
+      "id": "f7e4ddfd-a79b-4388-bb2a-effe724732e3",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get all items\nconst allArticles = items;\n\n// 2. Slice the top 5\nconst top5 = allArticles.slice(0, 10);\n\n// 3. Merge them into one single text block\nconst combinedText = top5.map(article => {\n  return `Title: ${article.json.title}\\nSummary: ${article.json.contentSnippet || article.json.content}`;\n}).join(\"\\n\\n---\\n\\n\");\n\n// 4. Return as a SINGLE item for the AI\nreturn [{\n  json: {\n    text_to_summarize: combinedText\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -16
+      ],
+      "id": "38e61ccc-0506-4bfe-8d15-b0d32ef29ac2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an Executive Tech Analyst. I will provide a list of article titles and descriptions.\n\n1. Identify the 5 most critical stories.\n\n2. Summarize each in one punchy sentence.\n\n3. Ignore clickbait.\n\n4. Start with \"🚀 Morning Briefing:\" {{ $json.text_to_summarize }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        608,
+        -16
+      ],
+      "id": "d7f663cf-bf77-45ee-963b-96c791034731",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        480,
+        192
+      ],
+      "id": "f19f1453-3892-4c4f-913a-047408c499cc",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PK9bUrnb5OzUxgYi",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5010742266",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        32
+      ],
+      "id": "d352b5bc-b6d1-4c39-a9a8-809acc4159eb",
+      "name": "Send a text message",
+      "webhookId": "8ff07e49-def0-40d5-a8a6-1ddb4bb2bc49",
+      "credentials": {
+        "telegramApi": {
+          "id": "j5AeGRebFWfLKZjz",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dc4d15d2-cc88-4984-94a4-1e8a908b8e1f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ce45e5b0e8c54d6de75bbe3acb660c0441335c6137305a1e89f1b1f5885b6436"
+  },
+  "id": "qLRt0PYwmAcVNHyG",
+  "tags": []
+}
