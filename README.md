@@ -1,4 +1,4 @@
-## 📰 AI News Agent using n8n & Gemini
+##  📈AI News Agent using n8n 
 
 ## 📌 Project Description
 
