@@ -79,9 +79,10 @@ Tech news alerts
 
 Crypto news bots
 
-Finance news summaries
+## 👩‍💻 Author
 
-Educational updates
-
-Research tracking
+Name: Swamini Deore
+Role: AI Automation Enthusiast | n8n Workflow Developer
+Project: AI News Agent Automation
+Skills: Python, Automation, AI Tools, n8n, Data Analytics
 
